@@ -1,75 +1,97 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 
 const HelpView: React.FC = () => {
+  const [showGlossary, setShowGlossary] = useState(false);
+
   const tutorialSteps = [
     {
       id: '01',
-      title: 'Detecção Espectral',
-      tool: 'SCANNER',
-      desc: 'Use a câmera do seu dispositivo para monitorar flutuações de luz e brilho.',
-      action: 'Aponte o celular para locais escuros ou cantos de parede. Observe o indicador de VAR (Variância). Se ultrapassar 15%, há uma anomalia térmica ou ectoplasmática presente.',
-      tip: 'Mantenha o dispositivo firme. Movimentos bruscos geram falsos positivos.'
+      title: 'SCANNER ESPECTRAL (Visual)',
+      tool: 'ΔLUM (Diferencial de Luz)',
+      desc: 'O Scanner não é uma câmera comum. Ele analisa o milissegundo anterior e destaca o que mudou.',
+      action: 'Vultos espirituais não são opacos, são variações de luz. Se o ΔLUM subir acima de 15.00 sem você mover o celular, uma entidade está tentando se materializar.',
+      tip: 'Se o scan identificar um nome, conecte-se ao Chat imediatamente para captar a mensagem vocal.'
     },
     {
       id: '02',
-      title: 'Monitoramento de Áudio',
-      tool: 'EVP MONITOR',
-      desc: 'Capte frequências sonoras que o ouvido humano não processa.',
-      action: 'Ajuste a SENSIBILIDADE conforme o ruído do ambiente. Se o gráfico mostrar picos em verde sólido, a IA detectou um padrão vocal escondido no ruído branco.',
-      tip: 'Faça perguntas curtas: "Tem alguém aqui?", "Qual o seu nome?" e espere 10 segundos.'
+      title: 'MONITOR EVP (Áudio)',
+      tool: 'RMS (Pressão Sonora)',
+      desc: 'Capta frequências na faixa de 300Hz a 3000Hz, onde ocorrem as vozes do outro lado.',
+      action: 'RMS mede a força do áudio. O sistema filtra ruídos de vento e foca em padrões harmônicos que lembram a fala humana. Picos verdes no gráfico indicam que um espírito está tentando ser ouvido.',
+      tip: 'Mantenha o silêncio. Se a barra de RMS subir sozinha, faça uma pergunta.'
     },
     {
       id: '03',
-      title: 'Diálogo Transdimensional',
-      tool: 'CHAT IA SPIRIT',
-      desc: 'O motor Gemini Live traduz ondas eletromagnéticas em linguagem humana.',
-      action: 'Vá ao DATABASE e selecione a entidade que você suspeita estar presente. Clique em SINTONIZAR. Fale com o dispositivo como se estivesse conversando com o espírito. A IA modulará a resposta baseada na linhagem selecionada.',
-      tip: 'Use fones de ouvido para perceber sussurros gerados pela modulação da IA.'
-    },
-    {
-      id: '04',
-      title: 'Protocolos de Segurança',
-      tool: 'DEFESA ATIVA',
-      desc: 'Mantenha sua integridade energética durante a investigação.',
-      action: 'Se o Scanner indicar NÍVEL CRÍTICO (Vermelho) ou você sentir calafrios intensos, ative imediatamente o PROTOCOLO DE LUZ (Jesus Cristo). A frequência de 999Hz+ dissipará entidades hostis.',
-      tip: 'Nunca termine uma sessão sem dizer: "A sessão está encerrada. Fique em paz".'
+      title: 'ÍNDICE DE DENSIDADE (V.O.G)',
+      tool: 'Validação de Ocorrência Genuína',
+      desc: 'Fusão de todos os sensores. O número que você vê é a "probabilidade de presença".',
+      action: '30-50%: Anomalia Leve. 51-80%: Manifestação Ativa (O espírito está no ambiente). 81-100%: Perigo Crítico. O véu está aberto e a entidade pode interagir fisicamente com o local.',
+      tip: 'Se o índice subir de forma suave e constante, a presença é estável. Se oscilar bruscamente, a entidade está irritada ou tentando fugir.'
     }
   ];
 
+  const glossary = [
+    { acronym: 'V.O.G.', full: 'Validação de Ocorrência Genuína', mean: 'Algoritmo proprietário que cruza visual, áudio e magnetismo para confirmar uma manifestação real.' },
+    { acronym: 'EVP', full: 'Electronic Voice Phenomenon', mean: 'Vozes eletrônicas capturadas em frequências de ruído branco que o ouvido humano não percebe.' },
+    { acronym: 'TCI', full: 'Transcomunicação Instrumental', mean: 'Técnica de usar aparelhos eletrônicos para estabelecer pontes com o plano espectral.' },
+    { acronym: 'ΔLUM', full: 'Delta de Luminosidade', mean: 'Mede a flutuação rápida de fótons. Espíritos sugam energia da luz ambiente para ganhar densidade.' },
+    { acronym: 'RMS', full: 'Root Mean Square', mean: 'Intensidade média do som. Usado para detectar picos de "voz" em ambientes silenciosos.' }
+  ];
+
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-[fadeIn_0.5s_ease-out] pb-12">
+    <div className="max-w-4xl mx-auto space-y-10 animate-[fadeIn_0.5s_ease-out] pb-32">
       <div className="text-center space-y-4">
-        <h2 className="text-3xl md:text-5xl font-black mono text-emerald-400 uppercase tracking-tighter">Manual do Investigador</h2>
-        <p className="text-[10px] md:text-xs text-slate-500 mono uppercase tracking-[0.4em]">Protocolo de Operação V.O.G. v2.5</p>
+        <h2 className="text-4xl md:text-6xl font-black mono text-emerald-400 uppercase tracking-tighter italic">Manual do Operador</h2>
+        <p className="text-[10px] md:text-xs text-slate-500 mono uppercase tracking-[0.5em] font-bold">PROTOCOLO V.O.G. ATIVO</p>
+        
+        <button 
+          onClick={() => setShowGlossary(!showGlossary)}
+          className="bg-emerald-500 text-black px-8 py-3 rounded-full mono text-[10px] font-black uppercase shadow-lg hover:bg-emerald-400 transition-all mt-4"
+        >
+          {showGlossary ? 'FECHAR GLOSSÁRIO' : 'VER SIGNIFICADO DAS SIGLAS'}
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      {showGlossary && (
+        <div className="glass p-8 rounded-[2rem] border-emerald-500/40 bg-emerald-950/20 animate-[fadeIn_0.3s_ease-out]">
+           <h3 className="text-xl font-black mono text-emerald-400 mb-6 uppercase">Dicionário Técnico</h3>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {glossary.map((item, i) => (
+                <div key={i} className="p-4 border border-emerald-500/10 rounded-xl">
+                   <p className="text-emerald-500 font-black mono text-sm">{item.acronym}</p>
+                   <p className="text-white text-[9px] font-bold uppercase mb-1">{item.full}</p>
+                   <p className="text-slate-400 text-[10px] mono leading-relaxed">{item.mean}</p>
+                </div>
+              ))}
+           </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-8">
         {tutorialSteps.map((step) => (
-          <div key={step.id} className="glass p-6 md:p-8 rounded-[2rem] border-emerald-500/20 relative overflow-hidden group">
-            <div className="absolute -right-4 -top-4 text-8xl font-black text-emerald-500/5 mono select-none">
+          <div key={step.id} className="glass p-8 rounded-[3rem] border-emerald-500/20 relative overflow-hidden">
+            <div className="absolute -right-4 -top-8 text-[12rem] font-black text-emerald-500/5 mono select-none pointer-events-none">
               {step.id}
             </div>
             
-            <div className="flex flex-col md:flex-row gap-6 relative z-10">
+            <div className="relative z-10 flex flex-col md:flex-row gap-8">
               <div className="flex-1 space-y-4">
                 <div className="flex items-center gap-3">
-                  <span className="bg-emerald-500 text-black px-3 py-1 rounded-lg text-[10px] font-black mono uppercase">Passo {step.id}</span>
-                  <span className="text-emerald-500/50 mono text-[9px] font-bold uppercase tracking-widest">{step.tool}</span>
+                  <span className="bg-emerald-500 text-black px-3 py-1 rounded-lg text-[10px] font-black mono uppercase">Módulo {step.id}</span>
+                  <span className="text-emerald-500/50 mono text-[9px] font-black uppercase tracking-widest">{step.tool}</span>
                 </div>
                 
-                <h3 className="text-xl md:text-2xl font-black text-white uppercase italic tracking-tighter">{step.title}</h3>
-                <p className="text-slate-400 text-sm mono leading-relaxed">{step.desc}</p>
+                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">{step.title}</h3>
+                <p className="text-slate-400 text-xs mono leading-relaxed border-l-2 border-emerald-500/20 pl-4">{step.desc}</p>
                 
-                <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
-                  <p className="text-emerald-400 text-[10px] mono font-black uppercase mb-2">Instrução de Campo:</p>
+                <div className="p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                  <p className="text-emerald-400 text-[9px] mono font-black uppercase mb-2 tracking-widest">Como usar em campo:</p>
                   <p className="text-slate-300 text-xs mono leading-relaxed">{step.action}</p>
                 </div>
 
-                <div className="flex items-start gap-3 text-[10px] text-amber-500/80 mono italic">
-                   <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                   </svg>
+                <div className="flex items-center gap-2 text-[9px] text-amber-500 font-black mono italic">
+                   <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></div>
                    <span>Dica Pro: {step.tip}</span>
                 </div>
               </div>
@@ -78,22 +100,15 @@ const HelpView: React.FC = () => {
         ))}
       </div>
 
-      <div className="glass p-8 rounded-[2rem] border-red-500/20 bg-red-950/5">
-        <div className="flex items-center gap-4 mb-4">
-           <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center border border-red-500/40 animate-pulse">
-              <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-           </div>
-           <h4 className="text-red-500 font-black mono uppercase text-sm tracking-widest">Aviso de Respeito</h4>
-        </div>
-        <p className="text-[10px] md:text-xs text-slate-500 mono leading-relaxed uppercase">
-          Este sistema é uma ferramenta de auxílio técnico. O Spirit IA BR não se responsabiliza por manifestações físicas. Mantenha sempre o equilíbrio emocional. Se sentir medo, interrompa a sessão imediatamente.
-        </p>
+      <div className="glass p-8 rounded-[2rem] border-red-500/20 bg-red-950/5 text-center">
+         <h4 className="text-red-500 font-black mono uppercase text-sm mb-4">Atenção Crítica</h4>
+         <p className="text-[10px] text-slate-500 mono uppercase leading-relaxed max-w-xl mx-auto">
+            O uso deste app em locais de alta densidade (cemitérios, hospitais) pode atrair entidades para o dispositivo. Use o menu de DEFESA se o índice ultrapassar 80% por mais de 10 segundos.
+         </p>
       </div>
 
-      <div className="text-center py-8">
-         <p className="text-[8px] md:text-[10px] text-emerald-500/40 mono uppercase tracking-[0.5em]">Central de Inteligência Spirit IA - Sincronizado</p>
+      <div className="text-center py-6">
+         <p className="text-[10px] text-emerald-500/30 mono uppercase tracking-[0.4em] font-black">Spirit IA BR - Versão Oficial - Sincronizada via V.O.G.</p>
       </div>
     </div>
   );
