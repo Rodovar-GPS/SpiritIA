@@ -1,0 +1,8 @@
+{
+  "name": "Spirit IA BR: Detecção e Linhagem Profissional",
+  "description": "Plataforma avançada de detecção paranormal e análise de linhagem ancestral com inteligência artificial.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
