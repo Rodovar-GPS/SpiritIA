@@ -24,7 +24,7 @@ const Dashboard: React.FC<DashboardProps> = ({ detectionState, onSintonize }) =>
         danger: riskInfo.label,
         location: 'Ambiente Local',
         plan: 'DESCONHECIDO',
-        desc: 'Sintonização baseada em picos de hardware no Dashboard.'
+        desc: 'Sintonização baseada em picos de hardware reais no Dashboard.'
       });
     }
   };
@@ -34,8 +34,8 @@ const Dashboard: React.FC<DashboardProps> = ({ detectionState, onSintonize }) =>
       <div className="glass p-5 md:p-8 rounded-[2rem] md:rounded-[3rem] border-emerald-500/20 overflow-hidden relative bg-gradient-to-br from-emerald-900/5 to-transparent shadow-2xl">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h2 className="text-emerald-500/60 mono text-[8px] md:text-[10px] uppercase tracking-[0.4em] mb-1 font-black">SISTEMA_VOG_REALTIME</h2>
-            <h3 className="text-xl md:text-4xl font-black tracking-tighter uppercase italic leading-tight">Métricas <span className="text-emerald-500">De Hardware</span></h3>
+            <h2 className="text-emerald-500/60 mono text-[8px] md:text-[10px] uppercase tracking-[0.4em] mb-1 font-black">HARDWARE_VOG_REALTIME</h2>
+            <h3 className="text-xl md:text-4xl font-black tracking-tighter uppercase italic leading-tight">Métricas <span className="text-emerald-500">Do Sensor</span></h3>
           </div>
           {detectionState.riskLevel > 40 && onSintonize && (
             <button 
@@ -48,10 +48,10 @@ const Dashboard: React.FC<DashboardProps> = ({ detectionState, onSintonize }) =>
         </div>
         
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-           <StatCard label="VISUAL (LUM)" value={`${detectionState.metrics.visual.toFixed(0)}%`} color={detectionState.metrics.visual > 50 ? "amber" : "emerald"} />
-           <StatCard label="AUDIO (RMS)" value={`${detectionState.metrics.audio.toFixed(0)}%`} color={detectionState.metrics.audio > 50 ? "amber" : "emerald"} />
-           <StatCard label="MAG/EMF (PROX)" value={`${detectionState.metrics.magnetic.toFixed(0)}%`} color={detectionState.metrics.magnetic > 50 ? "red" : "emerald"} />
-           <StatCard label="ECTO_GLOBAL" value={`${detectionState.riskLevel}%`} color={riskInfo.color} />
+           <StatCard label="LUMINOSIDADE (Δ)" value={`${detectionState.metrics.visual.toFixed(0)}%`} color={detectionState.metrics.visual > 50 ? "amber" : "emerald"} />
+           <StatCard label="ACÚSTICA (RMS)" value={`${detectionState.metrics.audio.toFixed(0)}%`} color={detectionState.metrics.audio > 50 ? "amber" : "emerald"} />
+           <StatCard label="MAGNETISMO (EMF)" value={`${detectionState.metrics.magnetic.toFixed(0)}%`} color={detectionState.metrics.magnetic > 50 ? "red" : "emerald"} />
+           <StatCard label="DENSIDADE_ECTO" value={`${detectionState.riskLevel}%`} color={riskInfo.color} />
         </div>
       </div>
 
@@ -67,7 +67,7 @@ const Dashboard: React.FC<DashboardProps> = ({ detectionState, onSintonize }) =>
                 riskInfo.color === 'red' ? 'text-red-500' : 
                 riskInfo.color === 'amber' ? 'text-amber-500' : 
                 'text-emerald-500'
-              }`}>Índice de Densidade Ectoplasmática</h3>
+              }`}>Índice de Densidade Ectoplasmática Real</h3>
               
               <div className="relative w-32 h-32 md:w-48 md:h-48 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90">
@@ -90,7 +90,7 @@ const Dashboard: React.FC<DashboardProps> = ({ detectionState, onSintonize }) =>
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center flex-col">
                   <span className="text-2xl md:text-4xl font-black mono tracking-tighter">{detectionState.riskLevel}%</span>
-                  <span className="text-[7px] md:text-[9px] mono opacity-50 font-bold uppercase">ECTO_DENSITY</span>
+                  <span className="text-[7px] md:text-[9px] mono opacity-50 font-bold uppercase">VALOR_SENSORIAL</span>
                 </div>
               </div>
               <p className={`text-center text-[9px] md:text-[10px] mono mt-4 uppercase font-black ${

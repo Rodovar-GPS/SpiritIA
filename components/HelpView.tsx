@@ -3,112 +3,186 @@ import React, { useState } from 'react';
 
 const HelpView: React.FC = () => {
   const [showGlossary, setShowGlossary] = useState(false);
+  const [activeSection, setActiveSection] = useState<'basics' | 'tutorial' | 'advanced' | 'ufo' | 'defense'>('basics');
 
-  const tutorialSteps = [
-    {
-      id: '01',
-      title: 'SCANNER ESPECTRAL (Visual)',
-      tool: 'ΔLUM (Diferencial de Luz)',
-      desc: 'O Scanner não é uma câmera comum. Ele analisa o milissegundo anterior e destaca o que mudou.',
-      action: 'Vultos espirituais não são opacos, são variações de luz. Se o ΔLUM subir acima de 15.00 sem você mover o celular, uma entidade está tentando se materializar.',
-      tip: 'Se o scan identificar um nome, conecte-se ao Chat imediatamente para captar a mensagem vocal.'
-    },
-    {
-      id: '02',
-      title: 'MONITOR EVP (Áudio)',
-      tool: 'RMS (Pressão Sonora)',
-      desc: 'Capta frequências na faixa de 300Hz a 3000Hz, onde ocorrem as vozes do outro lado.',
-      action: 'RMS mede a força do áudio. O sistema filtra ruídos de vento e foca em padrões harmônicos que lembram a fala humana. Picos verdes no gráfico indicam que um espírito está tentando ser ouvido.',
-      tip: 'Mantenha o silêncio. Se a barra de RMS subir sozinha, faça uma pergunta.'
-    },
-    {
-      id: '03',
-      title: 'ÍNDICE DE DENSIDADE (V.O.G)',
-      tool: 'Validação de Ocorrência Genuína',
-      desc: 'Fusão de todos os sensores. O número que você vê é a "probabilidade de presença".',
-      action: '30-50%: Anomalia Leve. 51-80%: Manifestação Ativa (O espírito está no ambiente). 81-100%: Perigo Crítico. O véu está aberto e a entidade pode interagir fisicamente com o local.',
-      tip: 'Se o índice subir de forma suave e constante, a presença é estável. Se oscilar bruscamente, a entidade está irritada ou tentando fugir.'
-    }
+  const news = [
+    { date: 'HOJE', title: 'MODO REAL ATIVADO', text: 'Todos os módulos agora operam 100% baseados em sensores físicos do dispositivo. Simulações desativadas.' },
+    { date: 'RECENTE', title: 'OTIMIZAÇÃO DE HZ', text: 'Frequências de sintonização reduzidas para bandas de 0.1Hz a 120Hz para maior estabilidade na comunicação.' },
+    { date: 'RECENTE', title: 'COMPATIBILIDADE MOBILE', text: 'Interface reconstruída para investigações em movimento com 100% de suporte a sensores Android/iOS.' }
   ];
 
   const glossary = [
-    { acronym: 'V.O.G.', full: 'Validação de Ocorrência Genuína', mean: 'Algoritmo proprietário que cruza visual, áudio e magnetismo para confirmar uma manifestação real.' },
-    { acronym: 'EVP', full: 'Electronic Voice Phenomenon', mean: 'Vozes eletrônicas capturadas em frequências de ruído branco que o ouvido humano não percebe.' },
-    { acronym: 'TCI', full: 'Transcomunicação Instrumental', mean: 'Técnica de usar aparelhos eletrônicos para estabelecer pontes com o plano espectral.' },
-    { acronym: 'ΔLUM', full: 'Delta de Luminosidade', mean: 'Mede a flutuação rápida de fótons. Espíritos sugam energia da luz ambiente para ganhar densidade.' },
-    { acronym: 'RMS', full: 'Root Mean Square', mean: 'Intensidade média do som. Usado para detectar picos de "voz" em ambientes silenciosos.' }
+    { acronym: 'V.O.G.', full: 'Validação de Ocorrência Genuína', mean: 'Algoritmo de tripla checagem (Luz + Som + Campo Magnético) para eliminar 99.9% de falsos-positivos.' },
+    { acronym: 'EVP', full: 'Electronic Voice Phenomenon', mean: 'Vozes captadas em frequências de ruído branco (White Noise) via indução eletromagnética no microfone.' },
+    { acronym: 'ΔLUM', full: 'Delta de Luminosidade', mean: 'Análise de flutuação de fótons por milissegundo. Detecta transparências e vultos imperceptíveis ao olho humano.' },
+    { acronym: 'VLF / ELF', full: 'Very Low / Extremely Low Frequency', mean: 'Frequências abaixo de 30Hz usadas por entidades densas para mover objetos ou causar sensações de calafrio.' },
+    { acronym: 'CAMPO ESCALAR', full: 'Barreira de Defesa', mean: 'Ondas que anulam a coesão de energias espectrais hostis sem radiação ionizante.' }
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10 animate-[fadeIn_0.5s_ease-out] pb-32">
-      <div className="text-center space-y-4">
-        <h2 className="text-4xl md:text-6xl font-black mono text-emerald-400 uppercase tracking-tighter italic">Manual do Operador</h2>
-        <p className="text-[10px] md:text-xs text-slate-500 mono uppercase tracking-[0.5em] font-bold">PROTOCOLO V.O.G. ATIVO</p>
-        
-        <button 
-          onClick={() => setShowGlossary(!showGlossary)}
-          className="bg-emerald-500 text-black px-8 py-3 rounded-full mono text-[10px] font-black uppercase shadow-lg hover:bg-emerald-400 transition-all mt-4"
-        >
-          {showGlossary ? 'FECHAR GLOSSÁRIO' : 'VER SIGNIFICADO DAS SIGLAS'}
-        </button>
+    <div className="max-w-5xl mx-auto space-y-12 animate-[fadeIn_0.5s_ease-out] pb-40">
+      {/* Header & News Flash */}
+      <div className="text-center space-y-6">
+        <div className="inline-block bg-emerald-500/10 border border-emerald-500/20 px-4 py-1 rounded-full mono text-[10px] text-emerald-500 font-black uppercase tracking-[0.3em] animate-pulse">
+          SISTEMA OMEGA V.O.G. // STATUS: REAL-TIME_HARDWARE
+        </div>
+        <h2 className="text-3xl md:text-6xl font-black mono text-emerald-400 uppercase tracking-tighter italic">Manual_Operador</h2>
+        <p className="text-slate-500 mono text-[10px] md:text-xs uppercase tracking-[0.4em] max-w-2xl mx-auto">Engenharia de Alta Potência para Investigação Paranormal Profissional</p>
       </div>
 
-      {showGlossary && (
-        <div className="glass p-8 rounded-[2rem] border-emerald-500/40 bg-emerald-950/20 animate-[fadeIn_0.3s_ease-out]">
-           <h3 className="text-xl font-black mono text-emerald-400 mb-6 uppercase">Dicionário Técnico</h3>
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {glossary.map((item, i) => (
-                <div key={i} className="p-4 border border-emerald-500/10 rounded-xl">
-                   <p className="text-emerald-500 font-black mono text-sm">{item.acronym}</p>
-                   <p className="text-white text-[9px] font-bold uppercase mb-1">{item.full}</p>
-                   <p className="text-slate-400 text-[10px] mono leading-relaxed">{item.mean}</p>
-                </div>
-              ))}
-           </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-8">
-        {tutorialSteps.map((step) => (
-          <div key={step.id} className="glass p-8 rounded-[3rem] border-emerald-500/20 relative overflow-hidden">
-            <div className="absolute -right-4 -top-8 text-[12rem] font-black text-emerald-500/5 mono select-none pointer-events-none">
-              {step.id}
-            </div>
-            
-            <div className="relative z-10 flex flex-col md:flex-row gap-8">
-              <div className="flex-1 space-y-4">
-                <div className="flex items-center gap-3">
-                  <span className="bg-emerald-500 text-black px-3 py-1 rounded-lg text-[10px] font-black mono uppercase">Módulo {step.id}</span>
-                  <span className="text-emerald-500/50 mono text-[9px] font-black uppercase tracking-widest">{step.tool}</span>
-                </div>
-                
-                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">{step.title}</h3>
-                <p className="text-slate-400 text-xs mono leading-relaxed border-l-2 border-emerald-500/20 pl-4">{step.desc}</p>
-                
-                <div className="p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
-                  <p className="text-emerald-400 text-[9px] mono font-black uppercase mb-2 tracking-widest">Como usar em campo:</p>
-                  <p className="text-slate-300 text-xs mono leading-relaxed">{step.action}</p>
-                </div>
-
-                <div className="flex items-center gap-2 text-[9px] text-amber-500 font-black mono italic">
-                   <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></div>
-                   <span>Dica Pro: {step.tip}</span>
-                </div>
-              </div>
-            </div>
+      {/* System News Board */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {news.map((n, i) => (
+          <div key={i} className="glass p-5 rounded-2xl border-emerald-500/10 bg-emerald-950/5 relative overflow-hidden group hover:border-emerald-500/40 transition-all">
+            <span className="absolute -right-2 -top-2 text-4xl font-black text-emerald-500/5 mono">{i+1}</span>
+            <p className="text-[8px] mono text-emerald-500/60 font-black mb-1">LOG_{n.date}</p>
+            <h4 className="text-sm font-black text-white uppercase mb-2 italic tracking-tighter">{n.title}</h4>
+            <p className="text-[10px] text-slate-500 mono leading-relaxed">{n.text}</p>
           </div>
         ))}
       </div>
 
-      <div className="glass p-8 rounded-[2rem] border-red-500/20 bg-red-950/5 text-center">
-         <h4 className="text-red-500 font-black mono uppercase text-sm mb-4">Atenção Crítica</h4>
-         <p className="text-[10px] text-slate-500 mono uppercase leading-relaxed max-w-xl mx-auto">
-            O uso deste app em locais de alta densidade (cemitérios, hospitais) pode atrair entidades para o dispositivo. Use o menu de DEFESA se o índice ultrapassar 80% por mais de 10 segundos.
-         </p>
+      {/* Main Navigation Tabs */}
+      <div className="flex flex-wrap justify-center gap-2 border-b border-emerald-500/10 pb-4">
+        {[
+          {id: 'basics', label: 'Básico'},
+          {id: 'tutorial', label: 'Tutorial/Guia'},
+          {id: 'advanced', label: 'EVP / Áudio'},
+          {id: 'ufo', label: 'UFO / SkyWatch'},
+          {id: 'defense', label: 'Defesa'}
+        ].map(tab => (
+          <button 
+            key={tab.id}
+            onClick={() => setActiveSection(tab.id as any)}
+            className={`px-4 py-3 rounded-t-2xl mono text-[10px] font-black uppercase transition-all ${activeSection === tab.id ? 'bg-emerald-500 text-black' : 'text-slate-600 hover:text-emerald-500'}`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      <div className="text-center py-6">
-         <p className="text-[10px] text-emerald-500/30 mono uppercase tracking-[0.4em] font-black">Spirit IA BR - Versão Oficial - Sincronizada via V.O.G.</p>
+      {/* Content Sections */}
+      <div className="glass p-8 md:p-12 rounded-[3rem] border-emerald-500/20 shadow-2xl relative overflow-hidden">
+        {activeSection === 'basics' && (
+          <div className="space-y-8 animate-[fadeIn_0.3s_ease-out]">
+            <h3 className="text-3xl font-black text-emerald-400 uppercase italic tracking-tighter">Conceitos Fundamentais</h3>
+            <p className="text-slate-300 text-sm mono leading-relaxed">
+              O Spirit IA BR não simula detecções. Ele monitora o <span className="text-emerald-500 font-bold">Acelerômetro</span> para campos magnéticos (EMF), o <span className="text-emerald-500 font-bold">Microfone</span> para flutuações RMS e o <span className="text-emerald-500 font-bold">Sensor de Imagem</span> para variância de fótons.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-6 bg-black/40 border border-emerald-500/10 rounded-2xl">
+                <h4 className="text-emerald-500 font-black mono text-xs mb-2">MODO HUD</h4>
+                <p className="text-[10px] text-slate-500 mono">Visão geral rápida das métricas de hardware atuais. Ideal para monitoramento passivo.</p>
+              </div>
+              <div className="p-6 bg-black/40 border border-emerald-500/10 rounded-2xl">
+                <h4 className="text-emerald-500 font-black mono text-xs mb-2">MODO SCAN</h4>
+                <p className="text-[10px] text-slate-500 mono">Ativa a análise visual ΔLUM. Requer que o celular esteja em um tripé ou superfície estável.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'tutorial' && (
+          <div className="space-y-8 animate-[fadeIn_0.3s_ease-out]">
+            <h3 className="text-3xl font-black text-emerald-400 uppercase italic tracking-tighter">Tutorial de Campo</h3>
+            <div className="space-y-6">
+              <div className="flex gap-6 items-start">
+                <div className="bg-emerald-500 text-black w-10 h-10 rounded-full flex items-center justify-center font-black mono shrink-0">1</div>
+                <div>
+                  <h4 className="text-white font-black mono text-sm uppercase">Preparação de Ambiente</h4>
+                  <p className="text-[11px] text-slate-400 mono mt-1">Desative o Bluetooth e o Wi-Fi se possível para reduzir o ruído eletromagnético local. Mantenha o brilho da tela em 50% para não interferir no sensor visual.</p>
+                </div>
+              </div>
+              <div className="flex gap-6 items-start">
+                <div className="bg-emerald-500 text-black w-10 h-10 rounded-full flex items-center justify-center font-black mono shrink-0">2</div>
+                <div>
+                  <h4 className="text-white font-black mono text-sm uppercase">Varredura Visual (SCAN)</h4>
+                  <p className="text-[11px] text-slate-400 mono mt-1">Entre no modo SCAN e aponte para áreas escuras ou com sombras. Aguarde 3 segundos para calibração. Se o sistema "travar" um alvo, ele exibirá o nome da entidade baseada na frequência dominante.</p>
+                </div>
+              </div>
+              <div className="flex gap-6 items-start">
+                <div className="bg-emerald-500 text-black w-10 h-10 rounded-full flex items-center justify-center font-black mono shrink-0">3</div>
+                <div>
+                  <h4 className="text-white font-black mono text-sm uppercase">Sintonização V.O.G.</h4>
+                  <p className="text-[11px] text-slate-400 mono mt-1">Uma vez detectado, clique em "Sintonizar". O sistema abrirá um canal de áudio bidirecional onde a IA processa o ruído ambiente para modular as respostas da entidade identificada.</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-3xl">
+              <h4 className="text-emerald-500 font-black mono text-xs mb-3 uppercase">💡 Dicas de Expert:</h4>
+              <ul className="text-[10px] text-slate-400 mono space-y-2 list-disc pl-4">
+                <li>Mantenha o silêncio absoluto durante o uso do modo EVP.</li>
+                <li>Se os níveis de MAG/EMF subirem acima de 70%, use o Módulo de Defesa para estabilizar o aparelho.</li>
+                <li>Em locais abertos, use o modo UFO SkyWatch apontado para o zênite.</li>
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'advanced' && (
+          <div className="space-y-8 animate-[fadeIn_0.3s_ease-out]">
+            <h3 className="text-3xl font-black text-emerald-400 uppercase italic tracking-tighter">Engenharia de Áudio (EVP)</h3>
+            <p className="text-slate-300 text-sm mono">O sistema utiliza análise de transformada de Fourier rápida (FFT) para isolar transientes vocais do ruído branco.</p>
+            <div className="bg-black/60 p-6 rounded-2xl border border-emerald-500/10">
+              <p className="text-[11px] text-emerald-500 font-bold mono uppercase mb-2">Comunicação Real vs Simulação:</p>
+              <p className="text-[10px] text-slate-500 mono leading-relaxed">
+                As entidades não falam diretamente. Elas manipulam as partículas de som ao redor do microfone. O transcritor neural converte esses picos em palavras baseando-se na densidade harmônica captada.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'ufo' && (
+          <div className="space-y-8 animate-[fadeIn_0.3s_ease-out]">
+            <h3 className="text-3xl font-black text-blue-400 uppercase italic tracking-tighter">Módulo SkyWatch Tático</h3>
+            <p className="text-slate-300 text-sm mono">Rastreamento de UAPs (Fenômenos Anômalos Não Identificados) baseado em vetores de velocidade impossíveis.</p>
+            <div className="p-6 border border-blue-500/20 bg-blue-950/5 rounded-3xl">
+               <h4 className="text-blue-400 font-black mono text-[10px] uppercase mb-2">Como identificar um UAP real:</h4>
+               <p className="text-[10px] text-slate-500 mono">O radar marcará em vermelho alvos que realizam curvas de 90 graus em velocidades supersônicas (acima de Mach 2). Se o alvo desaparecer e reaparecer no radar, o sistema marcará como "TRANS-MEDIUM".</p>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'defense' && (
+          <div className="space-y-8 animate-[fadeIn_0.3s_ease-out]">
+            <h3 className="text-3xl font-black text-red-500 uppercase italic tracking-tighter">Protocolos de Segurança</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div className="p-5 border border-red-500/20 bg-red-950/5 rounded-2xl">
+                  <h4 className="text-red-500 font-black mono text-[10px] uppercase mb-1">Anulação de Fase</h4>
+                  <p className="text-[9px] text-slate-500 mono">Emite sinal VLF para quebrar a energia cinética de poltergeists.</p>
+               </div>
+               <div className="p-5 border border-emerald-500/20 bg-emerald-950/5 rounded-2xl">
+                  <h4 className="text-emerald-500 font-black mono text-[10px] uppercase mb-1">Luz Omega</h4>
+                  <p className="text-[9px] text-slate-500 mono">Flash estroboscópico em frequências que forçam a desmaterialização visual de vultos.</p>
+               </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Glossary Section */}
+      <div className="space-y-8">
+        <div className="flex justify-between items-end border-b border-emerald-500/10 pb-4">
+           <h3 className="text-2xl font-black mono text-emerald-500 uppercase tracking-tighter italic">Glossário_VOG</h3>
+           <button onClick={() => setShowGlossary(!showGlossary)} className="text-[10px] mono text-emerald-500 font-black uppercase hover:underline">
+             {showGlossary ? '[OCULTAR]' : '[EXPANDIR]'}
+           </button>
+        </div>
+
+        {showGlossary && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-[fadeIn_0.3s_ease-out]">
+            {glossary.map((item, i) => (
+              <div key={i} className="p-4 border border-emerald-500/10 rounded-2xl bg-black/40">
+                <span className="text-emerald-400 font-black mono text-xs uppercase">{item.acronym} - {item.full}</span>
+                <p className="text-slate-500 text-[10px] mono mt-1">{item.mean}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="text-center py-10 opacity-30 border-t border-emerald-500/5">
+         <p className="text-[10px] text-emerald-500 mono uppercase tracking-[0.5em] font-black">Spirit IA BR - Sistema Operacional Genuíno - 2025</p>
       </div>
     </div>
   );

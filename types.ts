@@ -8,7 +8,8 @@ export enum ViewType {
   ARCHIVES = 'ARCHIVES',
   SPIRITUAL_DEFENSE = 'SPIRITUAL_DEFENSE',
   SPIRIT_CHAT = 'SPIRIT_CHAT',
-  HELP = 'HELP'
+  HELP = 'HELP',
+  UFO_DETECTOR = 'UFO_DETECTOR'
 }
 
 export type PlanType = 'FREE' | 'INICIADO' | 'INVESTIGADOR' | 'ARQUIVISTA';
@@ -34,25 +35,15 @@ export interface Spirit {
 }
 
 export interface SensorMetrics {
-  visual: number;   // 0-100 (camera variance)
-  audio: number;    // 0-100 (mic rms)
-  magnetic: number; // 0-100 (motion/emf proxy)
+  visual: number;   
+  audio: number;    
+  magnetic: number; 
 }
 
 export interface DetectionState {
   isScanning: boolean;
   signals: number[];
-  lastEntity: EntityInfo | null;
+  lastEntity: any | null;
   riskLevel: number;
   metrics: SensorMetrics;
-}
-
-export interface EntityInfo {
-  id: string;
-  name: string;
-  type: string;
-  lineage: string;
-  confidence: number;
-  frequency: string;
-  description: string;
 }

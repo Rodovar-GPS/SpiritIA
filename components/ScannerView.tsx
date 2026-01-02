@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { DetectionState, Spirit } from '../types';
 
 interface ScannerViewProps {
@@ -11,175 +11,166 @@ const ScannerView: React.FC<ScannerViewProps> = ({ setDetectionState, onSintoniz
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isReady, setIsReady] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState({ brightness: 0, variance: 0 });
   const [detectedSpirit, setDetectedSpirit] = useState<{name: string, freq: string} | null>(null);
+  const persistenceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    async function setupCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: 'environment' },
-          audio: false 
-        });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          setIsReady(true);
-        }
-      } catch (err) {
-        console.error("Acesso à câmera negado", err);
+  const setupCamera = async () => {
+    setCameraError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        },
+        audio: false 
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        setIsReady(true);
+      }
+    } catch (err: any) { 
+      console.error("Erro na Câmera:", err);
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setCameraError("ACESSO NEGADO: Verifique as permissões de câmera do navegador.");
+      } else if (err.name === 'NotReadableError' || err.message?.includes('could not start')) {
+        setCameraError("ERRO DE HARDWARE: Outro app (ou sobreposição/balão) pode estar usando a câmera.");
+      } else {
+        setCameraError("FALHA CRÍTICA: Não foi possível inicializar o sensor óptico.");
       }
     }
+  };
+
+  useEffect(() => {
     setupCamera();
-    
     return () => {
-      setDetectionState(prev => ({ 
-        ...prev, 
-        isScanning: false, 
-        metrics: { ...prev.metrics, visual: 0 } 
-      }));
+      setDetectionState(prev => ({ ...prev, isScanning: false, metrics: { ...prev.metrics, visual: 0 } }));
+      if (persistenceTimer.current) clearTimeout(persistenceTimer.current);
+      
+      // Parar stream da câmera ao desmontar
+      if (videoRef.current?.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+      }
     };
   }, []);
 
-  // Motor de Identificação Espectral
+  // Motor de Identificação com Persistência de 5 Segundos
   useEffect(() => {
-    if (metrics.variance > 12) {
-      const names = ["VULTO_ERRANTE", "OBSESSOR_L3", "POLTERGEIST_ACT", "ENTIDADE_Z", "MENSAGEIRO"];
-      const freqs = ["12.5Hz", "4.4Hz", "7.8Hz", "528Hz", "1.2Hz"];
+    if (metrics.variance > 14) {
+      if (persistenceTimer.current) clearTimeout(persistenceTimer.current);
+      
+      const names = ["EIDOLON_PRIME", "SINAL_KAPPA", "SOMBRA_VLF", "VIBRANTE_ALPHA", "ESPECTRO_09"];
+      const freqs = ["3.3Hz", "0.8Hz", "1.5Hz", "11.1Hz", "6.6Hz"];
       const idx = Math.floor(metrics.variance % names.length);
       
-      setDetectedSpirit({
-        name: names[idx],
-        freq: freqs[idx]
-      });
-    } else {
-      setDetectedSpirit(null);
+      setDetectedSpirit({ name: names[idx], freq: freqs[idx] });
+
+      persistenceTimer.current = setTimeout(() => {
+        setDetectedSpirit(null);
+      }, 5000);
     }
   }, [metrics.variance]);
 
   useEffect(() => {
     if (!isReady) return;
-
     const interval = setInterval(() => {
       if (canvasRef.current && videoRef.current) {
         const ctx = canvasRef.current.getContext('2d', { willReadFrequently: true });
-        if (ctx) {
+        if (ctx && videoRef.current.readyState === 4) {
           ctx.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-          
           const frame = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
           const data = frame.data;
-          let brightnessSum = 0;
-          for (let i = 0; i < data.length; i += 4) {
-            brightnessSum += (data[i] + data[i+1] + data[i+2]) / 3;
-          }
-          const avgBrightness = brightnessSum / (data.length / 4);
-          const currentVariance = Math.abs(avgBrightness - metrics.brightness);
+          let bSum = 0;
+          for (let i = 0; i < data.length; i += 4) bSum += (data[i] + data[i+1] + data[i+2]) / 3;
+          const avgB = bSum / (data.length / 4);
+          const curVar = Math.abs(avgB - metrics.brightness);
           
-          setMetrics(prev => ({
-            brightness: avgBrightness,
-            variance: currentVariance
-          }));
-
-          const visualIntensity = Math.min(100, currentVariance * 20);
-          
+          setMetrics(prev => ({ brightness: avgB, variance: curVar }));
           setDetectionState(prev => ({
             ...prev,
             isScanning: true,
-            metrics: { ...prev.metrics, visual: visualIntensity }
+            metrics: { ...prev.metrics, visual: Math.min(100, curVar * 25) }
           }));
 
-          if (currentVariance > 20 && 'vibrate' in navigator) {
-             navigator.vibrate([200, 100, 200]);
-          }
-
           ctx.globalCompositeOperation = 'difference';
-          ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
+          ctx.fillStyle = 'rgba(16, 185, 129, 0.1)';
           ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
           ctx.globalCompositeOperation = 'source-over';
         }
       }
     }, 150);
-
     return () => clearInterval(interval);
-  }, [isReady, metrics.brightness, setDetectionState]);
+  }, [isReady, metrics.brightness]);
 
   const handleConnect = () => {
     if (onSintonize && detectedSpirit) {
       onSintonize({
         name: detectedSpirit.name,
         freq: detectedSpirit.freq,
-        danger: metrics.variance > 15 ? 'ALTA' : 'MODERADA',
-        location: 'Ambiente do Scan',
-        plan: 'ESPECTRAL',
-        desc: `Entidade sintonizada via detecção direta de variância luminosa (ΔLUM: ${metrics.variance.toFixed(2)}).`
+        danger: 'MODULADA',
+        location: 'Biometria Visual',
+        plan: 'TRANS-DIMENSIONAL',
+        desc: `Sintonização via ΔLUM Estável (Persistência 5s ativa).`
       });
     }
   };
 
   return (
-    <div className="relative rounded-[2rem] overflow-hidden border border-emerald-500/30 bg-black aspect-[3/4] md:aspect-[21/9] animate-[fadeIn_0.5s_ease-out] shadow-2xl">
+    <div className="relative rounded-[2rem] overflow-hidden border border-emerald-500/30 bg-black aspect-[3/4] md:aspect-[16/9] shadow-2xl">
       <div className="scanline"></div>
       
-      {!isReady && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 z-20">
-          <div className="text-center">
-            <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="mono text-[10px] text-emerald-500 uppercase font-black">Sincronizando Sensor Visual...</p>
-          </div>
+      {cameraError ? (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-8 bg-black/90 text-center animate-[fadeIn_0.5s_ease-out]">
+           <div className="w-16 h-16 border-2 border-red-500 rounded-full flex items-center justify-center mb-6 animate-pulse">
+              <span className="text-red-500 font-black text-2xl">!</span>
+           </div>
+           <h3 className="text-red-500 font-black uppercase text-sm mb-2">ERRO DE SENSOR ÓPTICO</h3>
+           <p className="text-slate-400 mono text-[10px] mb-6 leading-relaxed max-w-xs uppercase italic">
+              {cameraError}
+              <br/><br/>
+              DICA: Feche todos os balões, notificações flutuantes e outros apps que usem a câmera.
+           </p>
+           <button 
+            onClick={setupCamera}
+            className="bg-emerald-500 text-black px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-2xl hover:bg-emerald-400 transition-all"
+           >
+             REINICIAR SENSORES
+           </button>
         </div>
+      ) : (
+        <>
+          <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover opacity-10 grayscale" />
+          <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-screen" width={480} height={640} />
+        </>
       )}
 
-      <video 
-        ref={videoRef} 
-        autoPlay 
-        playsInline 
-        muted 
-        className="absolute inset-0 w-full h-full object-cover opacity-10 grayscale"
-      />
-      <canvas 
-        ref={canvasRef} 
-        className="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-screen"
-        width={320}
-        height={420}
-      />
-
-      {/* HUD OVERLAY */}
-      <div className="absolute inset-0 pointer-events-none p-4 flex flex-col justify-between z-30">
+      <div className="absolute inset-0 p-6 flex flex-col justify-between pointer-events-none">
         <div className="flex justify-between items-start">
-          <div className="mono text-emerald-400 text-[8px] bg-black/80 p-3 border border-emerald-500/20 backdrop-blur-md rounded-lg">
-            SINAL_RMS: {Math.round(metrics.brightness)} LUX<br/>
-            ΔLUM: {metrics.variance.toFixed(2)}<br/>
-            STATUS: {metrics.variance > 5 ? 'CAPTANDO' : 'VARREDURA'}
-          </div>
-          <div className="mono text-red-500 text-[8px] text-right bg-black/80 p-3 border border-red-500/20 rounded-lg">
-            DETECT_VOG: {(metrics.variance * 1.5).toFixed(1)}%<br/>
-            MODO: INFRARED_SIM
+          <div className="bg-black/80 border border-emerald-500/20 p-3 rounded-xl text-[8px] mono text-emerald-400">
+            NÚCLEO_LUM: {Math.round(metrics.brightness)}<br/>
+            VAR_Δ: {metrics.variance.toFixed(2)}<br/>
+            RASTREAMENTO: {detectedSpirit ? 'ALVO_TRAVADO' : 'BUSCANDO...'}
           </div>
         </div>
 
         {detectedSpirit && (
-          <div className="flex flex-col items-center gap-4 animate-pulse">
-             <div className="bg-red-600/90 text-white px-6 py-2 rounded-full border-2 border-white/20 shadow-2xl">
-                <p className="mono text-[10px] font-black uppercase tracking-tighter">ANOMALIA IDENTIFICADA!</p>
-                <h4 className="text-xl font-black italic tracking-tighter leading-none">{detectedSpirit.name}</h4>
-                <p className="text-[12px] mono font-bold text-center mt-1">FREQ: {detectedSpirit.freq}</p>
-             </div>
-             
-             <button 
-                onClick={handleConnect}
-                className="pointer-events-auto bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-3 rounded-2xl font-black mono text-[10px] uppercase shadow-[0_0_40px_rgba(16,185,129,0.5)] transition-all active:scale-95"
-             >
-                CONECTAR AO CHAT AGORA
-             </button>
+          <div className="flex flex-col items-center gap-4 animate-[fadeIn_0.2s_ease-out]">
+            <div className="bg-emerald-500 text-black px-6 py-3 rounded-2xl border-4 border-emerald-400/50 shadow-[0_0_50px_rgba(16,185,129,0.5)]">
+               <p className="text-[9px] font-black uppercase tracking-widest text-center opacity-70">Alvo Identificado (Persistência 5s)</p>
+               <h4 className="text-2xl font-black italic tracking-tighter text-center">{detectedSpirit.name}</h4>
+               <p className="text-sm font-black text-center mt-1">SINAL: {detectedSpirit.freq}</p>
+            </div>
+            <button 
+              onClick={handleConnect}
+              className="pointer-events-auto bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-2xl transition-all"
+            >
+              INICIAR CHAT V.O.G.
+            </button>
           </div>
         )}
-
-        <div className="flex justify-center mb-2">
-           <div className="flex gap-1 h-8 items-end opacity-40">
-              {[...Array(20)].map((_, i) => (
-                <div key={i} className="w-1 bg-emerald-500" style={{height: `${Math.random() * metrics.variance * 5}%`}}></div>
-              ))}
-           </div>
-        </div>
       </div>
     </div>
   );

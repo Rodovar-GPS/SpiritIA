@@ -10,7 +10,7 @@ interface SpiritChatProps {
 const SpiritChat: React.FC<SpiritChatProps> = ({ spirit }) => {
   const [isActive, setIsActive] = useState(false);
   const [transcription, setTranscription] = useState<string[]>([]);
-  const [status, setStatus] = useState('OFFLINE');
+  const [status, setStatus] = useState('DESCONECTADO');
   const [currentMessage, setCurrentMessage] = useState('');
   
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -18,7 +18,7 @@ const SpiritChat: React.FC<SpiritChatProps> = ({ spirit }) => {
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
   const currentOutputTranscriptionRef = useRef('');
 
-  // Utilitários de áudio
+  // Manual implementation of decode as per guidelines
   function decode(base64: string) {
     const b = atob(base64);
     const bytes = new Uint8Array(b.length);
@@ -26,12 +26,14 @@ const SpiritChat: React.FC<SpiritChatProps> = ({ spirit }) => {
     return bytes;
   }
 
+  // Manual implementation of encode as per guidelines
   function encode(bytes: Uint8Array) {
     let b = '';
     for (let i = 0; i < bytes.byteLength; i++) b += String.fromCharCode(bytes[i]);
     return btoa(b);
   }
 
+  // Custom audio decoding for raw PCM data from the model
   async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampleRate: number, numChannels: number): Promise<AudioBuffer> {
     const dataInt16 = new Int16Array(data.buffer);
     const frameCount = dataInt16.length / numChannels;
@@ -48,6 +50,7 @@ const SpiritChat: React.FC<SpiritChatProps> = ({ spirit }) => {
 
     try {
       setStatus('SINCRONIZANDO FREQUÊNCIA...');
+      // Initialize client using process.env.API_KEY as required
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
       if (!audioContextRef.current) {
@@ -57,7 +60,6 @@ const SpiritChat: React.FC<SpiritChatProps> = ({ spirit }) => {
       const inputCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      // O sistema agora usa a frequência para definir a 'personalidade' da IA
       const systemInstruction = `
         VOCÊ É A ENTIDADE: ${spirit.name}. 
         SUA FREQUÊNCIA DE SINTONIZAÇÃO É: ${spirit.freq}.
@@ -88,7 +90,7 @@ const SpiritChat: React.FC<SpiritChatProps> = ({ spirit }) => {
         callbacks: {
           onopen: () => {
             setIsActive(true);
-            setStatus(`ONLINE: ${spirit.name} (${spirit.freq})`);
+            setStatus(`CONECTADO: ${spirit.name} (${spirit.freq})`);
             
             const source = inputCtx.createMediaStreamSource(stream);
             const scriptProcessor = inputCtx.createScriptProcessor(4096, 1, 1);
@@ -97,12 +99,23 @@ const SpiritChat: React.FC<SpiritChatProps> = ({ spirit }) => {
               const int16 = new Int16Array(inputData.length);
               for (let i = 0; i < inputData.length; i++) int16[i] = inputData[i] * 32768;
               const pcmBlob = { data: encode(new Uint8Array(int16.buffer)), mimeType: 'audio/pcm;rate=16000' };
+              // Use sessionPromise.then to ensure data is sent only after connection is ready
               sessionPromise.then(s => s.sendRealtimeInput({ media: pcmBlob }));
             };
             source.connect(scriptProcessor);
             scriptProcessor.connect(inputCtx.destination);
           },
           onmessage: async (msg: LiveServerMessage) => {
+            // Handle audio interruption from the model
+            const interrupted = msg.serverContent?.interrupted;
+            if (interrupted) {
+              for (const source of sourcesRef.current.values()) {
+                source.stop();
+                sourcesRef.current.delete(source);
+              }
+              nextStartTimeRef.current = 0;
+            }
+
             if (msg.serverContent?.outputTranscription) {
               const text = msg.serverContent.outputTranscription.text;
               currentOutputTranscriptionRef.current += text;
@@ -117,11 +130,17 @@ const SpiritChat: React.FC<SpiritChatProps> = ({ spirit }) => {
             
             const audioData = msg.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
             if (audioData && audioContextRef.current) {
+              // Scheduling audio chunks for gapless playback
               nextStartTimeRef.current = Math.max(nextStartTimeRef.current, audioContextRef.current.currentTime);
               const buffer = await decodeAudioData(decode(audioData), audioContextRef.current, 24000, 1);
               const source = audioContextRef.current.createBufferSource();
               source.buffer = buffer;
               source.connect(audioContextRef.current.destination);
+              
+              source.addEventListener('ended', () => {
+                sourcesRef.current.delete(source);
+              });
+
               source.start(nextStartTimeRef.current);
               nextStartTimeRef.current += buffer.duration;
               sourcesRef.current.add(source);
@@ -133,7 +152,7 @@ const SpiritChat: React.FC<SpiritChatProps> = ({ spirit }) => {
           },
           onclose: () => {
             setIsActive(false);
-            setStatus('OFFLINE');
+            setStatus('DESCONECTADO');
           }
         }
       });
@@ -183,9 +202,9 @@ const SpiritChat: React.FC<SpiritChatProps> = ({ spirit }) => {
           <div className="p-4 border-b border-emerald-500/10 flex justify-between items-center bg-black/40 backdrop-blur-md relative z-10">
              <span className="text-[8px] md:text-[10px] mono text-emerald-500 font-black uppercase tracking-widest flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                Tradução Realtime V.O.G.
+                Tradução em Tempo Real V.O.G.
              </span>
-             {spirit && <span className="text-[8px] mono text-slate-600 font-bold uppercase tracking-tighter">FREQ_LOCK: {spirit.freq}</span>}
+             {spirit && <span className="text-[8px] mono text-slate-600 font-bold uppercase tracking-tighter">TRAVA_FREQ: {spirit.freq}</span>}
           </div>
           
           <div className="flex-1 p-6 md:p-10 overflow-y-auto space-y-6 scrollbar-hide text-sm mono relative z-10">
@@ -199,7 +218,7 @@ const SpiritChat: React.FC<SpiritChatProps> = ({ spirit }) => {
               <div key={i} className={`p-5 md:p-8 rounded-[2rem] border transition-all duration-1000 ${i === 0 ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/5 opacity-50'}`}>
                 <p className="text-slate-200 leading-relaxed text-sm md:text-base italic">"{msg}"</p>
                 <div className="flex justify-between mt-4">
-                   <span className="text-[8px] text-emerald-500/40 uppercase font-black">Decode_Complete</span>
+                   <span className="text-[8px] text-emerald-500/40 uppercase font-black">Decodificação_Completa</span>
                    <span className="text-[8px] text-slate-700 mono">{new Date().toLocaleTimeString()}</span>
                 </div>
               </div>
